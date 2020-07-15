@@ -8,15 +8,15 @@ const router = express.Router()
 router.post('/', (req, res) => {
     const { title, contents } = req.body
 
-    if (!title || !contents) {res.status(400).json({ errorMessage: "Please provide title and contents for the post." })}
+    if (!title || !contents) {res.status(400).json({ error: "Please provide title and contents for the post." })}
     
     db.insert({ title, contents })
         .then(({ id }) => {
             db.findById(id)
                 .then(([post]) => {res.status(201).json(post)})
-                .catch(err => {res.status(500).json({ errorMessage: "There was an error retrieving new post" })})
+                .catch(err => {res.status(500).json({ error: "There was an error retrieving new post" })})
         })
-        .catch(err => {res.status(500).json({ errorMessage: "There was an error while saving the post to the database" })})  
+        .catch(err => {res.status(500).json({ error: "There was an error while saving the post to the database" })})  
 })
 
 // POST
@@ -26,7 +26,7 @@ router.post('/:post_id/comments', (req, res) => {
     const { post_id } = req.params
     const { text } = req.body
 
-    if( !text ) { return res.status( 400 ).json( { errorMessage: "Comment requires a string" })}
+    if( !text ) { return res.status( 400 ).json( { error: "Comment requires a string" })}
 
     db.insertComment({ text, post_id })
         .then(({ id: comment_id }) => {
@@ -35,12 +35,12 @@ router.post('/:post_id/comments', (req, res) => {
                     if (comment) {
                         res.status(201).json(comment)
                     } else {
-                        res.status(404).json({ errorMessage: "Comment with specified ID not found" })
+                        res.status(404).json({ error: "Comment with specified ID not found" })
                     }
                 })
-                .catch(err => { res.status(500).json({ errorMessage: `Error retrieving comment: (${err})` }) }) 
+                .catch(err => { res.status(500).json({ error: `Error retrieving comment: (${err})` }) }) 
         })
-        .catch(err => { res.status(500).json({ errorMessage: `Error adding comment to post: (${err})` }) }) 
+        .catch(err => { res.status(500).json({ error: `Error adding comment to post: (${err})` }) }) 
 })
 
 // GET
@@ -49,7 +49,7 @@ router.post('/:post_id/comments', (req, res) => {
 router.get('/', (req, res) => {
     db.find()
         .then(posts => {res.status(200).json(posts)})
-        .catch(error => {res.status(500).json({errorMessage: "There was an error while saving the post to the database."})
+        .catch(error => {res.status(500).json({error: "There was an error while saving the post to the database."})
     })
 })
 
@@ -65,7 +65,7 @@ router.get('/:id', (req, res) => {
             if (post) {
                 res.status(200).json(post)
             } else {
-                res.status(404).json({ errorMessage: "Post with id does not exist" })
+                res.status(404).json({ error: "Post with id does not exist" })
             }
         })
 
@@ -86,15 +86,15 @@ router.get('/:id/comments', (req, res) => {
                     })
                     .catch(err => {
                         console.log('error fetching comments', err)
-                        res.status(500).json({errorMessage: "Error getting comments"})
+                        res.status(500).json({error: "Error getting comments"})
                     })
             } else {
-                res.status(404).json({errorMessage: "Post with specified ID does not exist."})
+                res.status(404).json({error: "Post with specified ID does not exist."})
             }
         })
         .catch(err => {
             console.log(err)
-            res.status(500).json({errorMessage: "Error getting comments"})
+            res.status(500).json({error: "Error getting comments"})
         })
 })
 
@@ -109,12 +109,12 @@ router.delete('/:id', (req, res) => {
                 console.log(`Post was deleted`)
                 res.status(204).end()
             } else {
-                res.status(404).json({errorMessage: "The post with the specified ID does not exist."})
+                res.status(404).json({error: "The post with the specified ID does not exist."})
             }
         })
         .catch(err => {
             console.log(err)
-            res.status(500).json({errorMessage: "There was an error deleting the post"})
+            res.status(500).json({error: "There was an error deleting the post"})
         })
 })
 
@@ -125,19 +125,19 @@ router.put('/:id', (req, res) => {
     const id = req.params.id
     const { title, contents } = req.body
 
-    if (!title || !contents) {return res.status(400).json({ errorMessage: "Please provide title and contents to update the post." })}
+    if (!title || !contents) {return res.status(400).json({ error: "Please provide title and contents to update the post." })}
 
     db.update(id, { title, contents })
         .then(update => {
             if (update) {
                 db.findById(id)
                     .then(post => res.status(200).json(post))
-                    .catch(err => {res.status(500).json({errorMessage: "Update was good but there was some error"})})
+                    .catch(err => {res.status(500).json({error: "Update was good but there was some error"})})
             } else {
-                res.status(404).json({ errorMessage: "The post with the specified ID does not exist." })
+                res.status(404).json({ error: "The post with the specified ID does not exist." })
             }
         })
-        .catch(err => {res.status(500).json({errorMessage: "The post could not be updated."})})
+        .catch(err => {res.status(500).json({error: "The post could not be updated."})})
 })
 
 module.exports = router
